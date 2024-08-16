@@ -24,9 +24,9 @@ class MyRobot(wpilib.TimedRobot):
         # Keep a reference to all the motor controllers used
         # self.talonfx = hardware.TalonFX(0, canbusName)
         # self.talonfx_follower = hardware.TalonFX(1, canbusName)
-        self.TOP_shooter_motor = hardware.TalonFX(19, "*")# update id
-        self.BOT_shooter_motor = hardware.TalonFX(18, "*")# update id
-        self.ROT_shooter_motor = hardware.TalonFX(17, "*")# update id
+        self.TOP_shooter_motor = hardware.TalonFX(19, "")# update id
+        self.BOT_shooter_motor = hardware.TalonFX(18, "")# update id
+        self.ROT_shooter_motor = hardware.TalonFX(17, "")# update id
 
         # Be able to switch which control request to use based on a button press
         # Start at velocity 0, use slot 0
@@ -99,16 +99,13 @@ class MyRobot(wpilib.TimedRobot):
 
         if self.joystick.getLeftTriggerAxis():#
             # Use velocity voltage
-            self.TOP_shooter_motor.set_control(self.velocity_voltage.with_velocity(max))# update 
-            self.BOT_shooter_motor.set_control(self.velocity_voltage.with_velocity(max))# update max valume
-        else:
-            # Disable the motor instead
-            self.TOP_shooter_motor.set_control(self.brake)
-            self.BOT_shooter_motor.set_control(self.brake)
+            self.TOP_shooter_motor.set_control(self.velocity_voltage.with_velocity(40))# update 
+            self.BOT_shooter_motor.set_control(self.velocity_voltage.with_velocity(-40))# update max valume
 
-        if self.joystick.getRightTriggerAxis():
-            self.TOP_shooter_motor.set_control(self.velocity_voltage.with_velocity(min))# update
-            self.BOT_shooter_motor.set_control(self.velocity_voltage.with_velocity(min))# update
+
+        elif self.joystick.getRightTriggerAxis():
+            self.TOP_shooter_motor.set_control(self.velocity_voltage.with_velocity(25))# update
+            self.BOT_shooter_motor.set_control(self.velocity_voltage.with_velocity(-25))# update
         else:
             self.TOP_shooter_motor.set_control(self.brake)
             self.BOT_shooter_motor.set_control(self.brake)
