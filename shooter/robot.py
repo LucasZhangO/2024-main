@@ -24,9 +24,9 @@ class MyRobot(wpilib.TimedRobot):
         # Keep a reference to all the motor controllers used
         # self.talonfx = hardware.TalonFX(0, canbusName)
         # self.talonfx_follower = hardware.TalonFX(1, canbusName)
-        self.TOP_shooter_motor = hardware.TalonFX(999, "*")# update id
-        self.BOT_shooter_motor = hardware.TalonFX(999, "*")# update id
-        self.ROT_shooter_motor = hardware.TalonFX(999, "*")# update id
+        self.TOP_shooter_motor = hardware.TalonFX(19, "*")# update id
+        self.BOT_shooter_motor = hardware.TalonFX(18, "*")# update id
+        self.ROT_shooter_motor = hardware.TalonFX(17, "*")# update id
 
         # Be able to switch which control request to use based on a button press
         # Start at velocity 0, use slot 0
@@ -97,7 +97,7 @@ class MyRobot(wpilib.TimedRobot):
         # Go for plus/minus 50 rotations per second
     
 
-        if self.joystick.getAButtonPressed():#
+        if self.joystick.getLeftTriggerAxis():#
             # Use velocity voltage
             self.TOP_shooter_motor.set_control(self.velocity_voltage.with_velocity(max))# update 
             self.BOT_shooter_motor.set_control(self.velocity_voltage.with_velocity(max))# update max valume
@@ -106,7 +106,7 @@ class MyRobot(wpilib.TimedRobot):
             self.TOP_shooter_motor.set_control(self.brake)
             self.BOT_shooter_motor.set_control(self.brake)
 
-        if self.joystick.getYButtonPressed():
+        if self.joystick.getRightTriggerAxis():
             self.TOP_shooter_motor.set_control(self.velocity_voltage.with_velocity(min))# update
             self.BOT_shooter_motor.set_control(self.velocity_voltage.with_velocity(min))# update
         else:
@@ -118,7 +118,7 @@ class MyRobot(wpilib.TimedRobot):
         rot_value=self.joystick.getRightY()
         if abs(rot_value) < 0.1:
             rot_value = 0
-        if self.joystick.getRightBumper():
+        if self.joystick.getRightStickButton():
             # Use velocity voltage
             self.ROT_shooter_motor.set_control(self.velocity_voltage.with_acceleration(rot_value))# update 
         else:
