@@ -20,10 +20,19 @@ class Drivetrain:
     """
 
     def __init__(self) -> None:
-        self.frontLeftLocation = wpimath.geometry.Translation2d(0.381, 0.381)
-        self.frontRightLocation = wpimath.geometry.Translation2d(0.381, -0.381)
-        self.backLeftLocation = wpimath.geometry.Translation2d(-0.381, 0.381)
-        self.backRightLocation = wpimath.geometry.Translation2d(-0.381, -0.381)
+
+        trackwidthMeters = 0.52705
+        wheelbaseMeters = 0.52705
+
+        self.frontLeftLocation = wpimath.geometry.Translation2d(trackwidthMeters/2, wheelbaseMeters/2)
+        self.frontRightLocation = wpimath.geometry.Translation2d(trackwidthMeters/2, -wheelbaseMeters/2)
+        self.backLeftLocation = wpimath.geometry.Translation2d(-trackwidthMeters/2, wheelbaseMeters/2)
+        self.backRightLocation = wpimath.geometry.Translation2d(-trackwidthMeters/2, -wheelbaseMeters/2)
+        
+        # self.frontLeftLocation = wpimath.geometry.Translation2d(0.381, 0.381)
+        # self.frontRightLocation = wpimath.geometry.Translation2d(0.381, -0.381)
+        # self.backLeftLocation = wpimath.geometry.Translation2d(-0.381, 0.381)
+        # self.backRightLocation = wpimath.geometry.Translation2d(-0.381, -0.381)
 
         self.frontLeft = swervemodule.SwerveModule(1, 2, 0, 1, 2, 3)
         self.frontRight = swervemodule.SwerveModule(3, 4, 4, 5, 6, 7)
