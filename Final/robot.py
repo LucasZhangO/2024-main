@@ -132,16 +132,24 @@ class MyRobot(wpilib.TimedRobot):
 
 
         cfg = configs.TalonFXConfiguration()
-        cfg.slot0.k_p = 3; # An error of 1 rotation results in 2.4 V output
-        cfg.slot0.k_i = 0; # No output for integrated error
-        cfg.slot0.k_d = 0.1; # A velocity of 1 rps results in 0.1 V output  # 0.1
+        # cfg.slot0.k_p = 3; # An error of 1 rotation results in 2.4 V output
+        # cfg.slot0.k_i = 0; # No output for integrated error
+        # cfg.slot0.k_d = 0.1; # A velocity of 1 rps results in 0.1 V output  # 0.1
+        # # Peak output of 8 V
+
+        # Swerve PID - 0818 new
+        cfg.slot0.k_p = 2.0 # An error of 1 rotation results in 2.4 V output
+        cfg.slot0.k_i = 0.01 # No output for integrated error
+        cfg.slot0.k_d = 0.05 # A velocity of 1 rps results in 0.1 V output  # 0.1
+        
         # Peak output of 8 V
+        cfg.slot0.k_v = 0.12
         cfg.voltage.peak_forward_voltage = 8
         cfg.voltage.peak_reverse_voltage = -8
 
-        cfg.slot1.k_p = 60; # An error of 1 rotation results in 60 A output
-        cfg.slot1.k_i = 0; # No output for integrated error
-        cfg.slot1.k_d = 6; # A velocity of 1 rps results in 6 A output
+        cfg.slot1.k_p = 60 # An error of 1 rotation results in 60 A output
+        cfg.slot1.k_i = 0 # No output for integrated error
+        cfg.slot1.k_d = 6 # A velocity of 1 rps results in 6 A output
         # Peak output of 120 A
         cfg.torque_current.peak_forward_torque_current = 120
         cfg.torque_current.peak_reverse_torque_current = -120
