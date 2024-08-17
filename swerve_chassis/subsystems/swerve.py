@@ -53,7 +53,7 @@ class Swerve:
         # per second to the left, and rotation at 1.5 radians per second
         # counterclockwise.
         # speeds = ChassisSpeeds(1.0, 3.0, 1.5)
-        speeds = ChassisSpeeds(y, x, rotation)
+        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(y, x, rotation)
 
         # Convert to module states
         moduleStates = self.kinematics.toSwerveModuleStates(speeds) # frontLeft, frontRight, backLeft, backRight
@@ -117,10 +117,10 @@ class SwerveModule:
             speed = 0
 
         # TODO: control self.steer motor to reach "angle" (angle->position closed loop)
-        
+        self.steer_motor.set_control(controls.PositionVoltage(0).with_slot(0).with_position(angle))
 
         # TODO: control self.drive motor to reach "speed" (speed closed loop)
-
+        self.drive_motor.set_control(controls.VelocityVoltage(0).with_slot(0).with_velocity(speed))
     
     # def 
     #     # Apply deadband
