@@ -26,6 +26,7 @@ class MyRobot(wpilib.TimedRobot):
         # self.talonfx = hardware.TalonFX(0, canbusName)
         # self.talonfx_follower = hardware.TalonFX(1, canbusName)
         self.INT_intake_motor = hardware.TalonFX(16, "")# update id
+        self.LTP_intake_motor = hardware.TalonFX(22, "")
 
         # Be able to switch which control request to use based on a button press
         # Start at velocity 0, use slot 0
@@ -68,6 +69,14 @@ class MyRobot(wpilib.TimedRobot):
                 break
         if not status.is_ok():
             print(f"Could not apply configs, error code: {status.name}")
+
+        for _ in range(0, 5):
+            status = self.LTP_intake_motor.configurator.apply(cfg_i)
+            if status.is_ok():
+                break
+        if not status.is_ok():
+            print(f"Could not apply configs, error code: {status.name}")
+        
         
         
 
@@ -82,15 +91,16 @@ class MyRobot(wpilib.TimedRobot):
             joy_value = 0
 
         # Go for plus/minus 50 rotations per second
-    
+
 
         if self.joystick.getBButton():#
             # Use velocity voltage
             self.INT_intake_motor.set_control(self.velocity_voltage.with_velocity(30))# update 
-            
+            self.LTP_intake_motor.set_control(self.velocity_voltage.with_velocity(30))# update
         else:
             # Disable the motor instead
             self.INT_intake_motor.set_control(self.brake)
+            self.LTP_intake_motor.set_control(self.brake)
     def testInit(self):
         pass
 

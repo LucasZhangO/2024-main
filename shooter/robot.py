@@ -3,6 +3,7 @@
     This is a demo program for TalonFX Velocity PID usage in Phoenix 6
 """
 import wpilib
+import time
 import math
 
 
@@ -27,6 +28,7 @@ class MyRobot(wpilib.TimedRobot):
         self.TOP_shooter_motor = hardware.TalonFX(19, "")# update id
         self.BOT_shooter_motor = hardware.TalonFX(18, "")# update id
         self.ROT_shooter_motor = hardware.TalonFX(17, "")# update id
+        self.RTP_shooter_motor = hardware.TalonFX(23, "")# update id
 
         # Be able to switch which control request to use based on a button press
         # Start at velocity 0, use slot 0
@@ -83,6 +85,13 @@ class MyRobot(wpilib.TimedRobot):
                 break
         if not status.is_ok():
             print(f"Could not apply configs, error code: {status.name}")
+        
+        for _ in range(0, 5):
+            status = self.RTP_shooter_motor.configurator.apply(cfg_s)
+            if status.is_ok():
+                break
+        if not status.is_ok():
+            print(f"Could not apply configs, error code: {status.name}")
 
 
 
@@ -101,26 +110,33 @@ class MyRobot(wpilib.TimedRobot):
             # Use velocity voltage
             self.TOP_shooter_motor.set_control(self.velocity_voltage.with_velocity(40))# update 
             self.BOT_shooter_motor.set_control(self.velocity_voltage.with_velocity(-40))# update max valume
-
+            time.sleep(0.5)
+            self.RTP_shooter_motor.set_control(self.velocity_voltage.with_velocity(-30))
+            
 
         elif self.joystick.getRightTriggerAxis():
             self.TOP_shooter_motor.set_control(self.velocity_voltage.with_velocity(25))# update
             self.BOT_shooter_motor.set_control(self.velocity_voltage.with_velocity(-25))# update
+            time.sleep(0.5)
+            self.RTP_shooter_motor.set_control(self.velocity_voltage.with_velocity(-30))
+
         else:
             self.TOP_shooter_motor.set_control(self.brake)
             self.BOT_shooter_motor.set_control(self.brake)
-        
-        
+            self.RTP_shooter_motor.set_control(self.brake)
 
-        rot_value=self.joystick.getRightY()
-        if abs(rot_value) < 0.1:
-            rot_value = 0
-        if self.joystick.getRightStickButton():
-            # Use velocity voltage
-            self.ROT_shooter_motor.set_control(self.velocity_voltage.with_acceleration(rot_value))# update 
-        else:
-            # Disable the motor instead
-            self.ROT_shooter_motor.set_control(self.brake)
+        
+        
+        # shooter rotation adjust 
+        # rot_value=self.joystick.getRightY()
+        # if abs(rot_value) < 0.1:
+        #     rot_value = 0
+        # if self.joystick.getRightStickButton():
+        #     # Use velocity voltage
+        #     self.ROT_shooter_motor.set_control(self.velocity_voltage.with_acceleration(rot_value))# update 
+        # else:
+        #     # Disable the motor instead
+        #     self.ROT_shooter_motor.set_control(self.brake)
 
 
         
