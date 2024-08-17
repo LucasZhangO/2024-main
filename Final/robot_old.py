@@ -3,7 +3,6 @@
     This is a demo program for TalonFX Velocity PID usage in Phoenix 6
 """
 import wpilib
-import wpimath
 import time
 import math
 import constants
@@ -11,9 +10,7 @@ import constants
 from wpimath.geometry import Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics
 from wpimath.kinematics import ChassisSpeeds
-from wpimath.filter import SlewRateLimiter
 from wpilib import cameraserver
-from swerve_chassis.subsystems.swerve import Swerve, SwerveModule
 
 from phoenix6 import hardware, signals, controls, configs, StatusCode
 
@@ -28,13 +25,7 @@ class MyRobot(wpilib.TimedRobot):
     def robotInit(self):
         """Robot initialization function"""
         
-        self.swerve = Swerve()
         self.camera = cameraserver
-
-        # Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
-        self.xspeedLimiter = SlewRateLimiter(3)
-        self.yspeedLimiter = SlewRateLimiter(3)
-        self.rotLimiter = SlewRateLimiter(3)
 
         # Keep a reference to all the motor controllers used
         # self.talonfx = hardware.TalonFX(0, canbusName)
@@ -306,7 +297,7 @@ class MyRobot(wpilib.TimedRobot):
 
         # Go for plus/minus 50 rotations per second
     
-############################################## Elevator ########################################################
+
         if self.joystick.getRightBumper():#
             # Use velocity voltage
             self.FRT_elevator_motor.set_control(self.velocity_voltage.with_velocity(30))# update 
@@ -321,9 +312,8 @@ class MyRobot(wpilib.TimedRobot):
         else:
             self.FRT_elevator_motor.set_control(self.brake)
             self.BAK_elevator_motor.set_control(self.brake)
-################################################################################################################
 
-############################################## Intake ##########################################################
+
         if self.joystick.getAButton():#
             # Use velocity voltage
             self.INT_intake_motor.set_control(self.velocity_voltage.with_velocity(30))# update 
@@ -337,7 +327,7 @@ class MyRobot(wpilib.TimedRobot):
             # Disable the motor instead
             self.INT_intake_motor.set_control(self.brake)
             self.LTP_intake_motor.set_control(self.brake)
-################################################################################################################
+
         
         # else:
         #     self.BL_steer_motor.set_position(0)
@@ -346,7 +336,6 @@ class MyRobot(wpilib.TimedRobot):
         #     self.FR_steer_motor.set_control(0)
 
         
-###############################################################################################################
         if self.joystick.getRightTriggerAxis():#
             # Use velocity voltage
             self.TOP_shooter_motor.set_control(self.velocity_voltage.with_velocity(40))# update 
@@ -357,81 +346,58 @@ class MyRobot(wpilib.TimedRobot):
             self.TOP_shooter_motor.set_control(self.brake)
             self.BOT_shooter_motor.set_control(self.brake)
             self.RTP_shooter_motor.set_control(self.brake)
-####################################################################################################################
 
-############################################### New Swerve Drive ########################################################
-        forwardAxis = - self.joystick.getLeftY()
-        xSpeed = self.xspeedLimiter.calculate(wpimath.applyDeadband(forwardAxis, 0.1)) * 2.5  ## 0.1 is the deadband; 2.5 is the max speed - 0818new
+        
+        
+        desired_rotations_per_second = joy_value * 50
+        desired_rotations = self.joystick.getLeftY() * 10
+        if abs(desired_rotations) <= 0.1: # Joystick deadzone
+            desired_rotations = 0
 
-        strafeAxis = - self.joystick.getLeftX()
-        ySpeed = self.yspeedLimiter.calculate(wpimath.applyDeadband(strafeAxis, 0.1)) * 2.5  ## 0.1 is the deadband; 2.5 is the max speed - 0818new
+        if self.joystick.getXButton():
+            self.BL_steer_motor.set_position(0)
+            self.BR_steer_motor.set_position(0)
+            self.FL_steer_motor.set_position(0)
+            self.FR_steer_motor.set_position(0)
 
-        yawX = - self.joystick.getRightX()
-        yawY = - self.joystick.getRightY()
-        targetYaw = math.atan2(yawX, yawY)
+        if self.joystick.getLeftStickButton():
+            # Use position voltage
+            self.FR_drive_motor.set_control(self.velocity_voltage.with_velocity(desired_rotations_per_second))
+            self.FL_drive_motor.set_control(self.velocity_voltage.with_velocity(desired_rotations_per_second))
+            self.BR_drive_motor.set_control(self.velocity_voltage.with_velocity(desired_rotations_per_second))
+            self.BL_drive_motor.set_control(self.velocity_voltage.with_velocity(desired_rotations_per_second))
+            self.FR_steer_motor.set_control(self.position_voltage.with_position(desired_rotations))
+            self.FL_steer_motor.set_control(self.position_voltage.with_position(desired_rotations))
+            self.BR_steer_motor.set_control(self.position_voltage.with_position(desired_rotations))
+            self.BL_steer_motor.set_control(self.position_voltage.with_position(desired_rotations))
 
-        if yawX > 0 and yawY > 0:
-            targetYaw = -targetYaw
-        elif yawX > 0 and yawY < 0:
-            targetYaw = -180 - targetYaw
-        elif yawX < 0 and yawY < 0:
-            targetYaw = 180 - targetYaw
-        elif yawX < 0 and yawY > 0:
-            targetYaw = -targetYaw
-
-        yawAxis = math.sqrt(yawX*yawX + yawY*yawY)
-        rot = self.rotLimiter.calculate(wpimath.applyDeadband(yawAxis, 0.1)) * 1  ## 0.1 is the deadband; 1 is the max turning speed - 0818new Help Me!!!!!
-        self.swerve.teleopPeriodic(xSpeed, ySpeed, rot)   ### -0818new Help Me!!!!
-############################################## Old Swerve Drive ########################################################
-        # desired_rotations_per_second = joy_value * 50
-        # desired_rotations = self.joystick.getLeftY() * 10
-        # if abs(desired_rotations) <= 0.1: # Joystick deadzone
-        #     desired_rotations = 0
-
-        # if self.joystick.getXButton():
-        #     self.BL_steer_motor.set_position(0)
-        #     self.BR_steer_motor.set_position(0)
-        #     self.FL_steer_motor.set_position(0)
-        #     self.FR_steer_motor.set_position(0)
-
-        # if self.joystick.getLeftStickButton():
-        #     # Use position voltage
-        #     self.FR_drive_motor.set_control(self.velocity_voltage.with_velocity(desired_rotations_per_second))
-        #     self.FL_drive_motor.set_control(self.velocity_voltage.with_velocity(desired_rotations_per_second))
-        #     self.BR_drive_motor.set_control(self.velocity_voltage.with_velocity(desired_rotations_per_second))
-        #     self.BL_drive_motor.set_control(self.velocity_voltage.with_velocity(desired_rotations_per_second))
-        #     self.FR_steer_motor.set_control(self.position_voltage.with_position(desired_rotations))
-        #     self.FL_steer_motor.set_control(self.position_voltage.with_position(desired_rotations))
-        #     self.BR_steer_motor.set_control(self.position_voltage.with_position(desired_rotations))
-        #     self.BL_steer_motor.set_control(self.position_voltage.with_position(desired_rotations))
-
-        # elif self.joystick.getRightStickButtonPressed():   # 9
-        #     if self.joystick.getRightStickButton():
-        #         self.FR_steer_motor.set_control(self.position_voltage.with_position(desired_rotations*0.8))
-        #         self.FL_steer_motor.set_control(self.position_voltage.with_position(desired_rotations*0.8))
-        #         self.BR_steer_motor.set_control(self.position_voltage.with_position(-desired_rotations*0.8))
-        #         self.BL_steer_motor.set_control(self.position_voltage.with_position(-desired_rotations*0.8))
-        #     else:
-        #         # Disable the motor instead
-        #         self.FR_steer_motor.set_control(self.brake)
-        #         self.FL_steer_motor.set_control(self.brake)
-        #         self.BR_steer_motor.set_control(self.brake)
-        #         self.BL_steer_motor.set_control(self.brake)  
-        #         self.FR_drive_motor.set_control(self.brake)
-        #         self.FL_drive_motor.set_control(self.brake)
-        #         self.BR_drive_motor.set_control(self.brake)
-        #         self.BL_drive_motor.set_control(self.brake)      
-        # else:
-        #     # Disable the motor instead
-        #     self.FR_steer_motor.set_control(self.brake)
-        #     self.FL_steer_motor.set_control(self.brake)
-        #     self.BR_steer_motor.set_control(self.brake)
-        #     self.BL_steer_motor.set_control(self.brake)
-        #     self.FR_drive_motor.set_control(self.brake)
-        #     self.FL_drive_motor.set_control(self.brake)
-        #     self.BR_drive_motor.set_control(self.brake)
-        #     self.BL_drive_motor.set_control(self.brake)
-#########################################################################################################################
+        elif self.joystick.getRightStickButtonPressed():   # 9
+            if self.joystick.getRightStickButton():
+                self.FR_steer_motor.set_control(self.position_voltage.with_position(desired_rotations*0.8))
+                self.FL_steer_motor.set_control(self.position_voltage.with_position(desired_rotations*0.8))
+                self.BR_steer_motor.set_control(self.position_voltage.with_position(-desired_rotations*0.8))
+                self.BL_steer_motor.set_control(self.position_voltage.with_position(-desired_rotations*0.8))
+            else:
+                # Disable the motor instead
+                self.FR_steer_motor.set_control(self.brake)
+                self.FL_steer_motor.set_control(self.brake)
+                self.BR_steer_motor.set_control(self.brake)
+                self.BL_steer_motor.set_control(self.brake)  
+                self.FR_drive_motor.set_control(self.brake)
+                self.FL_drive_motor.set_control(self.brake)
+                self.BR_drive_motor.set_control(self.brake)
+                self.BL_drive_motor.set_control(self.brake)      
+        else:
+            # Disable the motor instead
+            self.FR_steer_motor.set_control(self.brake)
+            self.FL_steer_motor.set_control(self.brake)
+            self.BR_steer_motor.set_control(self.brake)
+            self.BL_steer_motor.set_control(self.brake)
+            self.FR_drive_motor.set_control(self.brake)
+            self.FL_drive_motor.set_control(self.brake)
+            self.BR_drive_motor.set_control(self.brake)
+            self.BL_drive_motor.set_control(self.brake)
+        
         
         # shooter rotation adjust 
         # rot_value=self.joystick.getRightY()
