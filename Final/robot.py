@@ -13,7 +13,7 @@ from wpimath.kinematics import SwerveDrive4Kinematics
 from wpimath.kinematics import ChassisSpeeds
 from wpimath.filter import SlewRateLimiter
 from wpilib import cameraserver
-from swerve_chassis.subsystems.swerve import Swerve, SwerveModule
+from swerve import Swerve, SwerveModule
 
 from phoenix6 import hardware, signals, controls, configs, StatusCode
 
@@ -366,22 +366,25 @@ class MyRobot(wpilib.TimedRobot):
         strafeAxis = - self.joystick.getLeftX()
         ySpeed = self.yspeedLimiter.calculate(wpimath.applyDeadband(strafeAxis, 0.1)) * 2.5  ## 0.1 is the deadband; 2.5 is the max speed - 0818new
 
-        yawX = - self.joystick.getRightX()
-        yawY = - self.joystick.getRightY()
-        targetYaw = math.atan2(yawX, yawY)
+        # yawX = - self.joystick.getRightX()
+        # yawY = - self.joystick.getRightY()
+        # targetYaw = math.atan2(yawX, yawY)
 
-        if yawX > 0 and yawY > 0:
-            targetYaw = -targetYaw
-        elif yawX > 0 and yawY < 0:
-            targetYaw = -180 - targetYaw
-        elif yawX < 0 and yawY < 0:
-            targetYaw = 180 - targetYaw
-        elif yawX < 0 and yawY > 0:
-            targetYaw = -targetYaw
+        # if yawX > 0 and yawY > 0:
+        #     targetYaw = -targetYaw
+        # elif yawX > 0 and yawY < 0:
+        #     targetYaw = -180 - targetYaw
+        # elif yawX < 0 and yawY < 0:
+        #     targetYaw = 180 - targetYaw
+        # elif yawX < 0 and yawY > 0:
+        #     targetYaw = -targetYaw
 
-        yawAxis = math.sqrt(yawX*yawX + yawY*yawY)
-        rot = self.rotLimiter.calculate(wpimath.applyDeadband(yawAxis, 0.1)) * 1  ## 0.1 is the deadband; 1 is the max turning speed - 0818new Help Me!!!!!
-        self.swerve.teleopPeriodic(xSpeed, ySpeed, rot)   ### -0818new Help Me!!!!
+        # yawAxis = math.sqrt(yawX*yawX + yawY*yawY)
+        # rot = self.rotLimiter.calculate(wpimath.applyDeadband(yawAxis, 0.1)) * 1  ## 0.1 is the deadband; 1 is the max turning speed - 0818new Help Me!!!!!
+        rotAxis = -self.joystick.getRightX()
+        rot = self.rotLimiter.calculate(wpimath.applyDeadband(rotAxis, 0.1)) * 1  ## 0.1 is the deadband; 1 is the max turning speed - 0818new Help Me!!!!!
+        self.swerve.drive(xSpeed, ySpeed, rot)
+          ### -0818new Help Me!!!!
 ############################################## Old Swerve Drive ########################################################
         # desired_rotations_per_second = joy_value * 50
         # desired_rotations = self.joystick.getLeftY() * 10
