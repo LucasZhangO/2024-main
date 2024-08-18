@@ -147,7 +147,7 @@ class MyRobot(wpilib.TimedRobot):
         # # Peak output of 8 V
 
         # Swerve PID - 0818 new
-        cfg.slot0.k_p = 0.25 # An error of 1 rotation results in 2.4 V output
+        cfg.slot0.k_p = 0.32 # An error of 1 rotation results in 2.4 V output
         cfg.slot0.k_i = 0.0 # No output for integrated error
         cfg.slot0.k_d = 0.0 # A velocity of 1 rps results in 0.1 V output  # 0.1
         cfg.slot0.k_s = 0.1 # To account for friction, add 0.1 V of static feedforward

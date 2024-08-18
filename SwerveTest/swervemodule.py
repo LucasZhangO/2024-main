@@ -15,10 +15,10 @@ import wpimath.units
 
 kWheelRadius = 0.0508
 kDriveMotorGearRatio = 8.14
-kTurningMotorGearRatio = 14.2857
+kTurningMotorGearRatio = 22.5 #14.2857
 kEncoderResolution = 2048
 kModuleMaxAngularVelocity = 180
-kModuleMaxAngularAcceleration = math.tau/math.pi*180
+# kModuleMaxAngularAcceleration = math.tau/math.pi*180
 
 
 class SwerveModule:
@@ -51,20 +51,20 @@ class SwerveModule:
         self.position_voltage = controls.PositionVoltage(0).with_slot(0)
         self.velocity_voltage = controls.VelocityVoltage(0).with_slot(0)
         # Start at position 0, use slot 1
-        self.position_torque = controls.PositionTorqueCurrentFOC(0).with_slot(1)
+        # self.position_torque = controls.PositionTorqueCurrentFOC(0).with_slot(1)
 
         # Gains are for example purposes only - must be determined for your own robot!
-        self.drivePIDController = wpimath.controller.PIDController(0.03, 0.000266394, 1.7) # Quote from 2022 - Jim Mei
+        # self.drivePIDController = wpimath.controller.PIDController(0.03, 0.000266394, 1.7) # Quote from 2022 - Jim Mei
 
         # Gains are for example purposes only - must be determined for your own robot!
-        self.turningPIDController = wpimath.controller.ProfiledPIDController(
-            14, 0.003428576394, 420,  # This is degree PID from 2022!!!! - Jim Mei
-            # 5, 0, 0,  ### PlaceHolder for Radian PID - Jim Mei
-            wpimath.trajectory.TrapezoidProfile.Constraints(
-                kModuleMaxAngularVelocity,
-                kModuleMaxAngularAcceleration,
-            ),
-        )
+        # self.turningPIDController = wpimath.controller.ProfiledPIDController(
+        #     14, 0.003428576394, 420,  # This is degree PID from 2022!!!! - Jim Mei
+        #     # 5, 0, 0,  ### PlaceHolder for Radian PID - Jim Mei
+        #     wpimath.trajectory.TrapezoidProfile.Constraints(
+        #         kModuleMaxAngularVelocity,
+        #         kModuleMaxAngularAcceleration,
+        #     ),
+        # )
 
         #  No kF
         # # Gains are for example purposes only - must be determined for your own robot!
@@ -73,7 +73,7 @@ class SwerveModule:
 
         # Limit the PID Controller's input range between -pi and pi and set the input
         # to be continuous.
-        self.turningPIDController.enableContinuousInput(-math.pi, math.pi)
+        # self.turningPIDController.enableContinuousInput(-math.pi, math.pi)
 
     def getState(self) -> wpimath.kinematics.SwerveModuleState:
         """Returns the current state of the module.
@@ -81,8 +81,8 @@ class SwerveModule:
         :returns: The current state of the module.
         """
         return wpimath.kinematics.SwerveModuleState(
-            self.driveMotor.get_velocity() * 10 / kDriveMotorGearRatio * kWheelRadius * math.pi * 2, 
-            wpimath.geometry.Rotation2d.fromDegrees(self.turningMotor.get_position().value),
+            self.driveMotor.get_velocity()  / kDriveMotorGearRatio * kWheelRadius * math.pi * 2,   # *10
+            wpimath.geometry.Rotation2d.fromDegrees(self.turningMotor.get_position().value / kTurningMotorGearRatio * 360)  # *10
         )
 
     # def getPosition(self) -> wpimath.kinematics.SwerveModulePosition:
@@ -109,7 +109,7 @@ class SwerveModule:
         # encoderRotation = wpimath.geometry.Rotation2d(wpimath.units.degreesToRadians(self.turningMotor.get_position())) 
         # print(dir(self.turningMotor.get_position()))
 
-        turningMotorPosition = self.turningMotor.get_position().value
+        turningMotorPosition = self.turningMotor.get_position().value / kTurningMotorGearRatio * 360 ### To Degrees
         # print(f"Turning Motor Position: {turningMotorPosition}, Value: {turningMotorPosition.value}")
 
         encoderRotation = wpimath.geometry.Rotation2d(wpimath.units.degreesToRadians(turningMotorPosition))   #### Check with lsy
@@ -121,14 +121,14 @@ class SwerveModule:
         )
 
         desiredAngle = state.angle.degrees()
-        angleDiff = self.turningMotor.get_position().value - desiredAngle
+        angleDiff = self.turningMotor.get_position().value / kTurningMotorGearRatio * 360 - desiredAngle
         desiredAngle += round(angleDiff / 360) * 360
 
         # Convert Desired Angle from degrees to rotations
         desiredAngle = desiredAngle / 360
 
         self.turningMotor.set_control(self.position_voltage.with_position(desiredAngle))
-        velocity_voltage_value = self.velocity_voltage.with_velocity(state.speed/(kWheelRadius * math.pi * 2) * kDriveMotorGearRatio / 10)
+        velocity_voltage_value = self.velocity_voltage.with_velocity(state.speed/(kWheelRadius * math.pi * 2) * kDriveMotorGearRatio ) #/10
         self.driveMotor.set_control(velocity_voltage_value)
 
 

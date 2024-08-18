@@ -35,7 +35,7 @@ class Swerve:
         )
 
         # add shuffleboard tab
-        self.FL_speed = Shuffleboard.getTab("Swerve").add("Front Left Speed", 0).getEntry()
+        self.FL_speed = Shuffleboard.getTab("Swerve").add("Front Left Speed", 0).getEntry() # set to 0.1
         self.FR_speed = Shuffleboard.getTab("Swerve").add("Front Right Speed", 0).getEntry()
         self.BL_speed = Shuffleboard.getTab("Swerve").add("Back Left Speed", 0).getEntry()
         self.BR_speed = Shuffleboard.getTab("Swerve").add("Back Right Speed", 0).getEntry()

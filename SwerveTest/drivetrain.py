@@ -10,8 +10,10 @@ import wpimath.geometry
 import wpimath.kinematics
 import swervemodule
 
-kMaxSpeed = 3.0  # 3 meters per second
-kMaxAngularSpeed = math.pi  # 1/2 rotation per second
+from wpilib.shuffleboard import Shuffleboard
+
+kMaxSpeed = 2.0  # 3 meters per second
+kMaxAngularSpeed = 180  # 1/2 rotation per second
 
 
 class Drivetrain:
@@ -39,7 +41,7 @@ class Drivetrain:
         self.backLeft = swervemodule.SwerveModule(driveMotorChannel=3, turningMotorChannel=4, turningEncoderChannel=5)
         self.backRight = swervemodule.SwerveModule(driveMotorChannel=6, turningMotorChannel=7, turningEncoderChannel=8)
 
-        self.gyro = wpilib.AnalogGyro(0)
+        self.gyro = wpilib.AnalogGyro(0) # TODO: phoenix6.hardware.corepegion2
 
         self.kinematics = wpimath.kinematics.SwerveDrive4Kinematics(
             self.frontLeftLocation,
@@ -61,13 +63,23 @@ class Drivetrain:
 
         self.gyro.reset()
 
+        # add shuffleboard tab
+        self.FL_speed = Shuffleboard.getTab("Swerve").add("Front Left Speed", 0.1).getEntry() # set to 0.1
+        self.FR_speed = Shuffleboard.getTab("Swerve").add("Front Right Speed", 0.1).getEntry()
+        self.BL_speed = Shuffleboard.getTab("Swerve").add("Back Left Speed", 0.1).getEntry()
+        self.BR_speed = Shuffleboard.getTab("Swerve").add("Back Right Speed", 0.1).getEntry()
+
+        # add angle to Shuffle  Board
+        self.FL_angle = Shuffleboard.getTab("Swerve").add("Front Left Angle", 0.1).getEntry()
+        self.FR_angle = Shuffleboard.getTab("Swerve").add("Front Right Angle", 0.1).getEntry()
+        self.BL_angle = Shuffleboard.getTab("Swerve").add("Back Left Angle", 0.1).getEntry()
+        self.BR_angle = Shuffleboard.getTab("Swerve").add("Back Right Angle", 0.1).getEntry()
+
     def drive(
         self,
         xSpeed: float,
         ySpeed: float,
         rot: float,
-        fieldRelative: bool,
-        periodSeconds: float,
     ) -> None:
         """
         Method to drive the robot using joystick info.
@@ -78,16 +90,7 @@ class Drivetrain:
         :param periodSeconds: Time
         """
         swerveModuleStates = self.kinematics.toSwerveModuleStates(
-            wpimath.kinematics.ChassisSpeeds.discretize(
-                (
-                    wpimath.kinematics.ChassisSpeeds.fromFieldRelativeSpeeds(
-                        xSpeed, ySpeed, rot, self.gyro.getRotation2d()
-                    )
-                    if fieldRelative
-                    else wpimath.kinematics.ChassisSpeeds(xSpeed, ySpeed, rot)
-                ),
-                periodSeconds,
-            )
+            wpimath.kinematics.ChassisSpeeds(xSpeed, ySpeed, rot) 
         )
         wpimath.kinematics.SwerveDrive4Kinematics.desaturateWheelSpeeds(
             swerveModuleStates, kMaxSpeed
@@ -96,6 +99,18 @@ class Drivetrain:
         self.frontRight.setDesiredState(swerveModuleStates[1])
         self.backLeft.setDesiredState(swerveModuleStates[2])
         self.backRight.setDesiredState(swerveModuleStates[3])
+
+        # Update Shuffleboard
+        self.FL_speed.setDouble(swerveModuleStates[0].speed)
+        self.FR_speed.setDouble(swerveModuleStates[1].speed)
+        self.BL_speed.setDouble(swerveModuleStates[2].speed)
+        self.BR_speed.setDouble(swerveModuleStates[3].speed)
+
+        self.FL_angle.setDouble(swerveModuleStates[0].angle.degrees()) 
+        self.FR_angle.setDouble(swerveModuleStates[1].angle.degrees())
+        self.BL_angle.setDouble(swerveModuleStates[2].angle.degrees())
+        self.BR_angle.setDouble(swerveModuleStates[3].angle.degrees())
+        
 
     # def updateOdometry(self) -> None:
     #     """Updates the field relative position of the robot."""
