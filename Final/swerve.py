@@ -34,6 +34,13 @@ class Swerve:
             self.frontLeftLocation, self.frontRightLocation, self.backLeftLocation, self.backRightLocation
         )
 
+        # add shuffleboard  tab
+        self.FL_speed = Shuffleboard.getTab("Swerve").add("Front Left Speed", 0).getEntry()
+        self.FR_speed = Shuffleboard.getTab("Swerve").add("Front Right Speed", 0).getEntry()
+        self.BL_speed = Shuffleboard.getTab("Swerve").add("Back Left Speed", 0).getEntry()
+        self.BR_speed = Shuffleboard.getTab("Swerve").add("Back Right Speed", 0).getEntry()
+
+
     def drive(self, x, y, rotation):
         # Example chassis speeds: 1 meter per second forward, 3 meters
         # per second to the left, and rotation at 1.5 radians per second
@@ -48,10 +55,17 @@ class Swerve:
         for state, module in zip(moduleStates, self.modules):
             module.setState(state)
 
-        Shuffleboard.getTab("Swerve").add("Front Left Speed", moduleStates[0].speed)
-        Shuffleboard.getTab("Swerve").add("Front Right Speed", moduleStates[1].speed)
-        Shuffleboard.getTab("Swerve").add("Back Left Speed", moduleStates[2].speed)
-        Shuffleboard.getTab("Swerve").add("Back Right Speed", moduleStates[3].speed)
+        # Update Shuffleboard
+        self.FL_speed.setDouble(moduleStates[0].speed)
+        self.FR_speed.setDouble(moduleStates[1].speed)
+        self.BL_speed.setDouble(moduleStates[2].speed)
+        self.BR_speed.setDouble(moduleStates[3].speed)
+
+        #  lsy shuffleboard old code
+        # Shuffleboard.getTab("Swerve").add("Front Left Speed", moduleStates[0].speed)
+        # Shuffleboard.getTab("Swerve").add("Front Right Speed", moduleStates[1].speed)
+        # Shuffleboard.getTab("Swerve").add("Back Left Speed", moduleStates[2].speed)
+        # Shuffleboard.getTab("Swerve").add("Back Right Speed", moduleStates[3].speed)
 
 class SwerveModule:
     def __init__(self, ids):
