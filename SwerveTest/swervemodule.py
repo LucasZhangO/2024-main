@@ -44,7 +44,8 @@ class SwerveModule:
         self.turningMotor = hardware.TalonFX(turningMotorChannel, "*")
         self.turningEncoder = hardware.CANcoder(turningEncoderChannel, "*")
 
-        # self.turningMotor.set_position(self.turningEncoder.get_position())  ##### Check with lsy
+        self.turningMotor.set_position(self.turningEncoder.get_position().value)  ##### Check with lsy
+
 
         # Start at position 0, use slot 0
         self.position_voltage = controls.PositionVoltage(0).with_slot(0)
@@ -81,7 +82,7 @@ class SwerveModule:
         """
         return wpimath.kinematics.SwerveModuleState(
             self.driveMotor.get_velocity() * 10 / kDriveMotorGearRatio * kWheelRadius * math.pi * 2, 
-            wpimath.geometry.Rotation2d.fromDegrees(self.turningMotor.get_position()),
+            wpimath.geometry.Rotation2d.fromDegrees(self.turningMotor.get_position().value),
         )
 
     # def getPosition(self) -> wpimath.kinematics.SwerveModulePosition:
@@ -108,8 +109,11 @@ class SwerveModule:
         # encoderRotation = wpimath.geometry.Rotation2d(wpimath.units.degreesToRadians(self.turningMotor.get_position())) 
         # print(dir(self.turningMotor.get_position()))
 
-        turningMotorPosition = self.turningEncoder.get_position()
+        turningMotorPosition = self.turningMotor.get_position().value
+        # print(f"Turning Motor Position: {turningMotorPosition}, Value: {turningMotorPosition.value}")
+
         encoderRotation = wpimath.geometry.Rotation2d(wpimath.units.degreesToRadians(turningMotorPosition))   #### Check with lsy
+        
 
         # Optimize the reference state to avoid spinning further than 90 degrees
         state = wpimath.kinematics.SwerveModuleState.optimize(
@@ -117,14 +121,16 @@ class SwerveModule:
         )
 
         desiredAngle = state.angle.degrees()
-        angleDiff = self.turningMotor.get_position() - desiredAngle
-        desiredAngle += math.round(angleDiff / 360) * 360
+        angleDiff = self.turningMotor.get_position().value - desiredAngle
+        desiredAngle += round(angleDiff / 360) * 360
 
         # Convert Desired Angle from degrees to rotations
         desiredAngle = desiredAngle / 360
 
         self.turningMotor.set_control(self.position_voltage.with_position(desiredAngle))
-        self.driveMotor.set_control(self.velocity_voltage(state.speed/(kWheelRadius * math.pi * 2) * kDriveMotorGearRatio / 10))
+        velocity_voltage_value = self.velocity_voltage.with_velocity(state.speed/(kWheelRadius * math.pi * 2) * kDriveMotorGearRatio / 10)
+        self.driveMotor.set_control(velocity_voltage_value)
+
 
         # # Scale speed by cosine of angle error. This scales down movement perpendicular to the desired
         # # direction of travel that can occur when modules change directions. This results in smoother
