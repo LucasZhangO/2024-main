@@ -7,6 +7,8 @@ import wpimath
 import time
 import math
 import constants
+import wpimath.controller
+import drivetrain
 
 from wpimath.geometry import Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics
@@ -30,6 +32,9 @@ class MyRobot(wpilib.TimedRobot):
         
         self.swerve = Swerve()
         self.camera = cameraserver
+
+        self.controller = wpilib.XboxController(0)
+        self.swerve = drivetrain.Drivetrain()
 
         # Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
         self.xspeedLimiter = SlewRateLimiter(3)
@@ -326,7 +331,7 @@ class MyRobot(wpilib.TimedRobot):
         #     joy_value = 0
 
         # Go for plus/minus 50 rotations per second
-    
+        self.driveWithJoystick()  #### Swerve Driving
 ############################################## Elevator ########################################################
         if self.joystick.getRightBumper():#
             # Use velocity voltage
@@ -379,32 +384,32 @@ class MyRobot(wpilib.TimedRobot):
             self.BOT_shooter_motor.set_control(self.brake)
             self.RTP_shooter_motor.set_control(self.brake)
 ####################################################################################################################
+        
+############################################### Old New Swerve Drive ########################################################
+        # forwardAxis = - self.joystick.getLeftY()
+        # xSpeed = self.xspeedLimiter.calculate(wpimath.applyDeadband(forwardAxis, 0.1)) * 1.5  ## 0.1 is the deadband; 2.5 is the max speed - 0818new
 
-############################################### New Swerve Drive ########################################################
-        forwardAxis = - self.joystick.getLeftY()
-        xSpeed = self.xspeedLimiter.calculate(wpimath.applyDeadband(forwardAxis, 0.1)) * 1.5  ## 0.1 is the deadband; 2.5 is the max speed - 0818new
+        # strafeAxis = - self.joystick.getLeftX()
+        # ySpeed = self.yspeedLimiter.calculate(wpimath.applyDeadband(strafeAxis, 0.1)) * 1.5  ## 0.1 is the deadband; 2.5 is the max speed - 0818new
 
-        strafeAxis = - self.joystick.getLeftX()
-        ySpeed = self.yspeedLimiter.calculate(wpimath.applyDeadband(strafeAxis, 0.1)) * 1.5  ## 0.1 is the deadband; 2.5 is the max speed - 0818new
+        # # yawX = - self.joystick.getRightX()
+        # # yawY = - self.joystick.getRightY()
+        # # targetYaw = math.atan2(yawX, yawY)
 
-        # yawX = - self.joystick.getRightX()
-        # yawY = - self.joystick.getRightY()
-        # targetYaw = math.atan2(yawX, yawY)
+        # # if yawX > 0 and yawY > 0:
+        # #     targetYaw = -targetYaw
+        # # elif yawX > 0 and yawY < 0:
+        # #     targetYaw = -180 - targetYaw
+        # # elif yawX < 0 and yawY < 0:
+        # #     targetYaw = 180 - targetYaw
+        # # elif yawX < 0 and yawY > 0:
+        # #     targetYaw = -targetYaw
 
-        # if yawX > 0 and yawY > 0:
-        #     targetYaw = -targetYaw
-        # elif yawX > 0 and yawY < 0:
-        #     targetYaw = -180 - targetYaw
-        # elif yawX < 0 and yawY < 0:
-        #     targetYaw = 180 - targetYaw
-        # elif yawX < 0 and yawY > 0:
-        #     targetYaw = -targetYaw
-
-        # yawAxis = math.sqrt(yawX*yawX + yawY*yawY)
-        # rot = self.rotLimiter.calculate(wpimath.applyDeadband(yawAxis, 0.1)) * 1  ## 0.1 is the deadband; 1 is the max turning speed - 0818new Help Me!!!!!
-        rotAxis = - self.joystick.getRightX()
-        rot = self.rotLimiter.calculate(wpimath.applyDeadband(rotAxis, 0.1)) * 1  ## 0.1 is the deadband; 1 is the max turning speed - 0818new Help Me!!!!!
-        self.swerve.drive(xSpeed, ySpeed, rot)
+        # # yawAxis = math.sqrt(yawX*yawX + yawY*yawY)
+        # # rot = self.rotLimiter.calculate(wpimath.applyDeadband(yawAxis, 0.1)) * 1  ## 0.1 is the deadband; 1 is the max turning speed - 0818new Help Me!!!!!
+        # rotAxis = - self.joystick.getRightX()
+        # rot = self.rotLimiter.calculate(wpimath.applyDeadband(rotAxis, 0.1)) * 1  ## 0.1 is the deadband; 1 is the max turning speed - 0818new Help Me!!!!!
+        # self.swerve.drive(xSpeed, ySpeed, rot)
           ### -0818new Help Me!!!!
 ############################################## Old Swerve Drive ########################################################
         # desired_rotations_per_second = joy_value * 50
@@ -468,7 +473,38 @@ class MyRobot(wpilib.TimedRobot):
         #     # Disable the motor instead
         #     self.ROT_shooter_motor.set_control(self.brake)
 
+    def driveWithJoystick(self) -> None:
+        # Get the x speed. We are inverting this because Xbox controllers return
+        # negative values when we push forward.
+        xSpeed = (
+            - self.xspeedLimiter.calculate(
+                wpimath.applyDeadband(self.controller.getLeftY(), 0.1)
+            )
+            * drivetrain.kMaxSpeed
+        )
 
+        # Get the y speed or sideways/strafe speed. We are inverting this because
+        # we want a positive value when we pull to the left. Xbox controllers
+        # return positive values when you pull to the right by default.
+        ySpeed = (
+            self.yspeedLimiter.calculate(
+                wpimath.applyDeadband(self.controller.getLeftX(), 0.1)
+            )
+            * drivetrain.kMaxSpeed
+        )
+
+        # Get the rate of angular rotation. We are inverting this because we want a
+        # positive value when we pull to the left (remember, CCW is positive in
+        # mathematics). Xbox controllers return positive values when you pull to
+        # the right by default.
+        rot = (
+            - self.rotLimiter.calculate(
+                wpimath.applyDeadband( self.controller.getRightX(), 0.1)
+            )
+            * drivetrain.kMaxSpeed
+        )
+
+        self.swerve.drive(xSpeed, ySpeed, rot)
         
     def testInit(self):
         pass
