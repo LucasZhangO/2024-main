@@ -17,10 +17,26 @@ CHASSIS_DATA = {
     "closed_loop_ramp_rate": 0.5,
 
     # TODO: update these values   # Jim Done 
-    "swerve_modules": { # steer_id, drive_id, encoder_id
-        "RF": [10, 20, 21],
-        "RB": [7, 6, 8],
-        "LB": [4, 3, 5],
-        "LF": [1, 0, 20]
+    "swerve_modules": {
+        "RF": {
+            "steer_id": 12, # Done
+            "drive_id": 10, # Done
+            "encoder_id": 21 # Done
+        },
+        "RB": {
+            "steer_id": 7, # Done
+            "drive_id": 6, # Done
+            "encoder_id": 8 # Done
+        },
+        "LB": {
+            "steer_id": 4, # Done 
+            "drive_id": 3, # Done
+            "encoder_id": 5 # Done
+        },
+        "LF": {
+            "steer_id": 1, # Done
+            "drive_id": 0, # Done 
+            "encoder_id": 20 # Done 
+        }
     },
 }
