@@ -97,7 +97,7 @@ class SwerveModule:
         # TODO: initialize the encoders # Done
         self.drive_encoder = self.drive_id         # hardware.Encoder(self.encoder_id) speed encoder
         self.steer_encoder = self.steer_id          # .... position encoder
-
+        self.cancoder = self.encoder_id
     
 
     def setState(self, state):
@@ -107,6 +107,8 @@ class SwerveModule:
         # Applyu deadband
         if abs(speed) < self.deadband_x:
             speed = 0
+        # if abs(y) < self.deadband_y:
+        #     y = 0
 
         # TODO: control self.steer motor to reach "angle" (angle->position closed loop)
         self.steer_motor.set_control(controls.PositionVoltage(0).with_slot(0).with_position(angle))
@@ -114,7 +116,7 @@ class SwerveModule:
         # TODO: control self.drive motor to reach "speed" (speed closed loop)
         self.drive_motor.set_control(controls.VelocityVoltage(0).with_slot(0).with_velocity(speed))
     
-    # def 
+    # def setMotorSpeeds(self, x, y, rotation):
     #     # Apply deadband
     #     if abs(x) < self.deadband_x:
     #         x = 0

@@ -245,7 +245,7 @@ class MyRobot(wpilib.TimedRobot):
                 break
         if not status.is_ok():
             print(f"Could not apply configs, error code: {status.name}")
-        self.FR_steer_motor.set_position(0)
+        # self.FR_steer_motor.set_position(0)
 
         for _ in range(0, 5):
             status = self.FL_steer_motor.configurator.apply(cfg)
@@ -255,7 +255,7 @@ class MyRobot(wpilib.TimedRobot):
             print(f"Could not apply configs, error code: {status.name}")
 
         # Make sure we start at 0
-        self.FL_steer_motor.set_position(0)
+        # self.FL_steer_motor.set_position(0)
 
         
         for _ in range(0, 5):
@@ -264,7 +264,7 @@ class MyRobot(wpilib.TimedRobot):
                 break
         if not status.is_ok():
             print(f"Could not apply configs, error code: {status.name}")
-        self.BR_steer_motor.set_position(0)
+        # self.BR_steer_motor.set_position(0)
 
         
         for _ in range(0, 5):
@@ -273,7 +273,9 @@ class MyRobot(wpilib.TimedRobot):
                 break
         if not status.is_ok():
             print(f"Could not apply configs, error code: {status.name}")
-        self.BL_steer_motor.set_position(0)
+        # self.BL_steer_motor.set_position(0)
+            
+
         status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
         for _ in range(0, 5):
             status = self.FR_drive_motor.configurator.apply(cfg_drive)
@@ -304,10 +306,10 @@ class MyRobot(wpilib.TimedRobot):
             print(f"Could not apply configs, error code: {status.name}")
 
         
-        # self.FR_drive_motor.set_control(controls.Follower(self.FR_steer_motor.device_id, False))   ### TBD!!!!
-        # self.FL_drive_motor.set_control(controls.Follower(self.FL_steer_motor.device_id, False))
-        # self.BR_drive_motor.set_control(controls.Follower(self.BR_steer_motor.device_id, False))
-        # self.BL_drive_motor.set_control(controls.Follower(self.BL_steer_motor.device_id, False))
+        self.FR_drive_motor.set_control(controls.Follower(self.FR_steer_motor.device_id, False))   ### TBD!!!!
+        self.FL_drive_motor.set_control(controls.Follower(self.FL_steer_motor.device_id, False))
+        self.BR_drive_motor.set_control(controls.Follower(self.BR_steer_motor.device_id, False))
+        self.BL_drive_motor.set_control(controls.Follower(self.BL_steer_motor.device_id, False))
 
     def autonomousInit(self):
         pass
@@ -380,10 +382,10 @@ class MyRobot(wpilib.TimedRobot):
 
 ############################################### New Swerve Drive ########################################################
         forwardAxis = - self.joystick.getLeftY()
-        xSpeed = self.xspeedLimiter.calculate(wpimath.applyDeadband(forwardAxis, 0.1)) * 1  ## 0.1 is the deadband; 2.5 is the max speed - 0818new
+        xSpeed = self.xspeedLimiter.calculate(wpimath.applyDeadband(forwardAxis, 0.1)) * 1.5  ## 0.1 is the deadband; 2.5 is the max speed - 0818new
 
         strafeAxis = - self.joystick.getLeftX()
-        ySpeed = self.yspeedLimiter.calculate(wpimath.applyDeadband(strafeAxis, 0.1)) * 1  ## 0.1 is the deadband; 2.5 is the max speed - 0818new
+        ySpeed = self.yspeedLimiter.calculate(wpimath.applyDeadband(strafeAxis, 0.1)) * 1.5  ## 0.1 is the deadband; 2.5 is the max speed - 0818new
 
         # yawX = - self.joystick.getRightX()
         # yawY = - self.joystick.getRightY()
@@ -400,7 +402,7 @@ class MyRobot(wpilib.TimedRobot):
 
         # yawAxis = math.sqrt(yawX*yawX + yawY*yawY)
         # rot = self.rotLimiter.calculate(wpimath.applyDeadband(yawAxis, 0.1)) * 1  ## 0.1 is the deadband; 1 is the max turning speed - 0818new Help Me!!!!!
-        rotAxis = -self.joystick.getRightX()
+        rotAxis = - self.joystick.getRightX()
         rot = self.rotLimiter.calculate(wpimath.applyDeadband(rotAxis, 0.1)) * 1  ## 0.1 is the deadband; 1 is the max turning speed - 0818new Help Me!!!!!
         self.swerve.drive(xSpeed, ySpeed, rot)
           ### -0818new Help Me!!!!
