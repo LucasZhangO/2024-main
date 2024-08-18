@@ -106,7 +106,10 @@ class SwerveModule:
         #     self.turningMotor.set_position(0)
 
         # encoderRotation = wpimath.geometry.Rotation2d(wpimath.units.degreesToRadians(self.turningMotor.get_position())) 
-        encoderRotation = wpimath.geometry.Rotation2d(wpimath.units.degreesToRadians(self.turningMotor.get_position())) 
+        # print(dir(self.turningMotor.get_position()))
+
+        turningMotorPosition = self.turningEncoder.get_position()
+        encoderRotation = wpimath.geometry.Rotation2d(wpimath.units.degreesToRadians(turningMotorPosition))   #### Check with lsy
 
         # Optimize the reference state to avoid spinning further than 90 degrees
         state = wpimath.kinematics.SwerveModuleState.optimize(
