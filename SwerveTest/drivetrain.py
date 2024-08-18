@@ -34,10 +34,10 @@ class Drivetrain:
         # self.backLeftLocation = wpimath.geometry.Translation2d(-0.381, 0.381)
         # self.backRightLocation = wpimath.geometry.Translation2d(-0.381, -0.381)
 
-        self.frontLeft = swervemodule.SwerveModule(driveMotorChannel=0, turningMotorChannel=1, turningEncoderChannelA=20)
-        self.frontRight = swervemodule.SwerveModule(driveMotorChannel=10, turningMotorChannel=12, turningEncoderChannelA=21)
-        self.backLeft = swervemodule.SwerveModule(driveMotorChannel=3, turningMotorChannel=4, turningEncoderChannelA=5)
-        self.backRight = swervemodule.SwerveModule(driveMotorChannel=6, turningMotorChannel=7, turningEncoderChannelA=8)
+        self.frontLeft = swervemodule.SwerveModule(driveMotorChannel=0, turningMotorChannel=1, turningEncoderChannel=20)
+        self.frontRight = swervemodule.SwerveModule(driveMotorChannel=10, turningMotorChannel=12, turningEncoderChannel=21)
+        self.backLeft = swervemodule.SwerveModule(driveMotorChannel=3, turningMotorChannel=4, turningEncoderChannel=5)
+        self.backRight = swervemodule.SwerveModule(driveMotorChannel=6, turningMotorChannel=7, turningEncoderChannel=8)
 
         self.gyro = wpilib.AnalogGyro(0)
 
@@ -48,16 +48,16 @@ class Drivetrain:
             self.backRightLocation,
         )
 
-        self.odometry = wpimath.kinematics.SwerveDrive4Odometry(
-            self.kinematics,
-            self.gyro.getRotation2d(),
-            (
-                self.frontLeft.getPosition(),
-                self.frontRight.getPosition(),
-                self.backLeft.getPosition(),
-                self.backRight.getPosition(),
-            ),
-        )
+        # self.odometry = wpimath.kinematics.SwerveDrive4Odometry(
+        #     self.kinematics,
+        #     self.gyro.getRotation2d(),
+        #     (
+        #         self.frontLeft.getPosition(),
+        #         self.frontRight.getPosition(),
+        #         self.backLeft.getPosition(),
+        #         self.backRight.getPosition(),
+        #     ),
+        # )
 
         self.gyro.reset()
 
@@ -92,19 +92,19 @@ class Drivetrain:
         wpimath.kinematics.SwerveDrive4Kinematics.desaturateWheelSpeeds(
             swerveModuleStates, kMaxSpeed
         )
-        self.frontLeft.setDesiredState(swerveModuleStates[0])
+        self.frontLeft.setDesiredState(swerveModuleStates[0])   
         self.frontRight.setDesiredState(swerveModuleStates[1])
         self.backLeft.setDesiredState(swerveModuleStates[2])
         self.backRight.setDesiredState(swerveModuleStates[3])
 
-    def updateOdometry(self) -> None:
-        """Updates the field relative position of the robot."""
-        self.odometry.update(
-            self.gyro.getRotation2d(),
-            (
-                self.frontLeft.getPosition(),
-                self.frontRight.getPosition(),
-                self.backLeft.getPosition(),
-                self.backRight.getPosition(),
-            ),
-        )
+    # def updateOdometry(self) -> None:
+    #     """Updates the field relative position of the robot."""
+    #     self.odometry.update(
+    #         self.gyro.getRotation2d(),
+    #         (
+    #             self.frontLeft.getPosition(),
+    #             self.frontRight.getPosition(),
+    #             self.backLeft.getPosition(),
+    #             self.backRight.getPosition(),
+    #         ),
+    #     )

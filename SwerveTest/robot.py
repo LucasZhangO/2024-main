@@ -25,9 +25,14 @@ class MyRobot(wpilib.TimedRobot):
         self.yspeedLimiter = wpimath.filter.SlewRateLimiter(3)
         self.rotLimiter = wpimath.filter.SlewRateLimiter(3)
 
-    def autonomousPeriodic(self) -> None:
-        self.driveWithJoystick(False)
-        self.swerve.updateOdometry()
+    def autonomousInit(self):
+        pass
+
+    def autonomousPeriodic(self):
+        pass
+
+    def teleopInit(self):
+        pass
 
     def teleopPeriodic(self) -> None:
         self.driveWithJoystick(True)
@@ -64,3 +69,13 @@ class MyRobot(wpilib.TimedRobot):
         )
 
         self.swerve.drive(xSpeed, ySpeed, rot, fieldRelative, self.getPeriod())
+
+    def testInit(self):
+        pass
+
+    def testPeriodic(self):
+        pass
+
+
+if __name__ == "__main__":
+    wpilib.run(MyRobot)

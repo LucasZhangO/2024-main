@@ -44,6 +44,8 @@ class SwerveModule:
         self.turningMotor = hardware.TalonFX(turningMotorChannel, "*")
         self.turningEncoder = hardware.CANcoder(turningEncoderChannel, "*")
 
+        # self.turningMotor.set_position(self.turningEncoder.get_position())  ##### Check with lsy
+
         # Start at position 0, use slot 0
         self.position_voltage = controls.PositionVoltage(0).with_slot(0)
         self.velocity_voltage = controls.VelocityVoltage(0).with_slot(0)
@@ -99,11 +101,12 @@ class SwerveModule:
 
         :param desiredState: Desired state with speed and angle.
         """
-        if desiredState.speed == 0:
-            self.driveMotor.set_position(0)
-            self.turningMotor.set_position(0)
+        # if desiredState.speed == 0:  ######
+        #     self.driveMotor.set_position(0)
+        #     self.turningMotor.set_position(0)
 
-        encoderRotation = wpimath.geometry.Rotation2d(wpimath.units.degreesToRadians(self.turningMotor.get_position()))
+        # encoderRotation = wpimath.geometry.Rotation2d(wpimath.units.degreesToRadians(self.turningMotor.get_position())) 
+        encoderRotation = wpimath.geometry.Rotation2d(wpimath.units.degreesToRadians(self.turningMotor.get_position())) 
 
         # Optimize the reference state to avoid spinning further than 90 degrees
         state = wpimath.kinematics.SwerveModuleState.optimize(
