@@ -34,10 +34,10 @@ class Drivetrain:
         # self.backLeftLocation = wpimath.geometry.Translation2d(-0.381, 0.381)
         # self.backRightLocation = wpimath.geometry.Translation2d(-0.381, -0.381)
 
-        self.frontLeft = swervemodule.SwerveModule(1, 2, 0, 1, 2, 3)
-        self.frontRight = swervemodule.SwerveModule(3, 4, 4, 5, 6, 7)
-        self.backLeft = swervemodule.SwerveModule(5, 6, 8, 9, 10, 11)
-        self.backRight = swervemodule.SwerveModule(7, 8, 12, 13, 14, 15)
+        self.frontLeft = swervemodule.SwerveModule(driveMotorChannel=0, turningMotorChannel=1, turningEncoderChannelA=20)
+        self.frontRight = swervemodule.SwerveModule(driveMotorChannel=10, turningMotorChannel=12, turningEncoderChannelA=21)
+        self.backLeft = swervemodule.SwerveModule(driveMotorChannel=3, turningMotorChannel=4, turningEncoderChannelA=5)
+        self.backRight = swervemodule.SwerveModule(driveMotorChannel=6, turningMotorChannel=7, turningEncoderChannelA=8)
 
         self.gyro = wpilib.AnalogGyro(0)
 

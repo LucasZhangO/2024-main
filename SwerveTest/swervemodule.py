@@ -13,7 +13,7 @@ import wpimath.trajectory
 from phoenix6 import hardware, controls
 
 kWheelRadius = 0.0508
-kEncoderResolution = 4096
+kEncoderResolution = 2048
 kModuleMaxAngularVelocity = math.pi
 kModuleMaxAngularAcceleration = math.tau
 
