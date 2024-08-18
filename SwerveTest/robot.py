@@ -38,12 +38,13 @@ class MyRobot(wpilib.TimedRobot):
 
         cfg = phoenix6.configs.TalonFXConfiguration()
         # Swerve PID - 0818 new
-        cfg.slot0.k_p = 0.32 # An error of 1 rotation results in 2.4 V output
+        cfg.slot0.k_p = 0.25 # An error of 1 rotation results in 2.4 V output
         cfg.slot0.k_i = 0.0 # No output for integrated error
         cfg.slot0.k_d = 0.0 # A velocity of 1 rps results in 0.1 V output  # 0.1
         cfg.slot0.k_s = 0.1 # To account for friction, add 0.1 V of static feedforward
         # Peak output of 8 V
         cfg.slot0.k_v = 0.12
+        # cfg.slot0.k_v = 0.05
         cfg.voltage.peak_forward_voltage = 8
         cfg.voltage.peak_reverse_voltage = -8
 
@@ -147,7 +148,7 @@ class MyRobot(wpilib.TimedRobot):
         # Get the x speed. We are inverting this because Xbox controllers return
         # negative values when we push forward.
         xSpeed = (
-            -self.xspeedLimiter.calculate(
+            - self.xspeedLimiter.calculate(
                 wpimath.applyDeadband(self.controller.getLeftY(), 0.1)
             )
             * drivetrain.kMaxSpeed
@@ -157,7 +158,7 @@ class MyRobot(wpilib.TimedRobot):
         # we want a positive value when we pull to the left. Xbox controllers
         # return positive values when you pull to the right by default.
         ySpeed = (
-            -self.yspeedLimiter.calculate(
+            self.yspeedLimiter.calculate(
                 wpimath.applyDeadband(self.controller.getLeftX(), 0.1)
             )
             * drivetrain.kMaxSpeed
@@ -168,8 +169,8 @@ class MyRobot(wpilib.TimedRobot):
         # mathematics). Xbox controllers return positive values when you pull to
         # the right by default.
         rot = (
-            -self.rotLimiter.calculate(
-                wpimath.applyDeadband(self.controller.getRightX(), 0.1)
+            - self.rotLimiter.calculate(
+                wpimath.applyDeadband( self.controller.getRightX(), 0.1)
             )
             * drivetrain.kMaxSpeed
         )

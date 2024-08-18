@@ -75,6 +75,9 @@ class Drivetrain:
         self.BL_angle = Shuffleboard.getTab("Swerve").add("Back Left Angle", 0.1).getEntry()
         self.BR_angle = Shuffleboard.getTab("Swerve").add("Back Right Angle", 0.1).getEntry()
 
+        self.BR_actual_angle = Shuffleboard.getTab("Swerve").add("BRActual Angle", 0.1).getEntry()
+
+        # self.BR_desire_angle = Shuffleboard.getTab("Swerve").add("BRDesire Angle", 0.1).getEntry()
     def drive(
         self,
         xSpeed: float,
@@ -110,6 +113,9 @@ class Drivetrain:
         self.FR_angle.setDouble(swerveModuleStates[1].angle.degrees())
         self.BL_angle.setDouble(swerveModuleStates[2].angle.degrees())
         self.BR_angle.setDouble(swerveModuleStates[3].angle.degrees())
+
+        self.BR_actual_angle.setDouble(self.backRight.turningMotor.get_position().value / swervemodule.kTurningMotorGearRatio * 360)
+        
         
 
     # def updateOdometry(self) -> None:

@@ -6,6 +6,7 @@
 
 import math
 import wpilib
+import wpilib.shuffleboard
 import wpimath.kinematics
 import wpimath.geometry
 import wpimath.controller
@@ -44,7 +45,7 @@ class SwerveModule:
         self.turningMotor = hardware.TalonFX(turningMotorChannel, "*")
         self.turningEncoder = hardware.CANcoder(turningEncoderChannel, "*")
 
-        self.turningMotor.set_position(self.turningEncoder.get_position().value)  ##### Check with lsy
+        # self.turningMotor.set_position(self.turningEncoder.get_position().value)  ##### Check with lsy
 
 
         # Start at position 0, use slot 0
@@ -75,11 +76,29 @@ class SwerveModule:
         # to be continuous.
         # self.turningPIDController.enableContinuousInput(-math.pi, math.pi)
 
+        # Add turning motor position to Shuffleboard
+        self.FL_turningMotor_pos = wpilib.shuffleboard.Shuffleboard.getTab("Swerve Module").add("FL Turning Motor Position", 0.1).getEntry()
+        self.FR_turningMotor_pos = wpilib.shuffleboard.Shuffleboard.getTab("Swerve Module").add("FR Turning Motor Position", 0.1).getEntry()
+        self.BL_turningMotor_pos = wpilib.shuffleboard.Shuffleboard.getTab("Swerve Module").add("BL Turning Motor Position", 0.1).getEntry()
+        self.BR_turningMotor_pos = wpilib.shuffleboard.Shuffleboard.getTab("Swerve Module").add("BR Turning Motor Position", 0.1).getEntry()
+
+        self.BR_desire_angle = wpilib.shuffleboard.Shuffleboard.getTab("Swerve Module").add("BR Desire Angle", 0.1).getEntry()
+
+        self.current_rotation = wpilib.shuffleboard.Shuffleboard.getTab("Swerve Module").add("Current Rotation", 0.1).getEntry()
+
     def getState(self) -> wpimath.kinematics.SwerveModuleState:
         """Returns the current state of the module.
 
         :returns: The current state of the module.
         """
+
+        # Update Shuffleboard
+        self.FL_turningMotor_pos.setDouble(self.turningMotor.get_position().value)
+        self.FR_turningMotor_pos.setDouble(self.turningMotor.get_position().value)
+        self.BL_turningMotor_pos.setDouble(self.turningMotor.get_position().value)
+        self.BR_turningMotor_pos.setDouble(self.turningMotor.get_position().value)
+        
+
         return wpimath.kinematics.SwerveModuleState(
             self.driveMotor.get_velocity()  / kDriveMotorGearRatio * kWheelRadius * math.pi * 2,   # *10
             wpimath.geometry.Rotation2d.fromDegrees(self.turningMotor.get_position().value / kTurningMotorGearRatio * 360)  # *10
@@ -109,23 +128,33 @@ class SwerveModule:
         # encoderRotation = wpimath.geometry.Rotation2d(wpimath.units.degreesToRadians(self.turningMotor.get_position())) 
         # print(dir(self.turningMotor.get_position()))
 
-        turningMotorPosition = self.turningMotor.get_position().value / kTurningMotorGearRatio * 360 ### To Degrees
+        turningMotorPosition = self.turningMotor.get_position().value_as_double / kTurningMotorGearRatio * 360 ### To Degrees
         # print(f"Turning Motor Position: {turningMotorPosition}, Value: {turningMotorPosition.value}")
 
-        encoderRotation = wpimath.geometry.Rotation2d(wpimath.units.degreesToRadians(turningMotorPosition))   #### Check with lsy
+        currentRotation = wpimath.geometry.Rotation2d(wpimath.units.degreesToRadians(turningMotorPosition))   #### Check with lsy
         
+        self.current_rotation.setDouble(currentRotation.degrees())
 
         # Optimize the reference state to avoid spinning further than 90 degrees
         state = wpimath.kinematics.SwerveModuleState.optimize(
-            desiredState, encoderRotation
+            desiredState, currentRotation
         )
+
+        # desiredAngle = state.angle.degrees()
+        # angleDiff = self.turningMotor.get_position().value / kTurningMotorGearRatio * 360 - desiredAngle
+        # desiredAngle += round((angleDiff) / 360) * 360
 
         desiredAngle = state.angle.degrees()
         angleDiff = self.turningMotor.get_position().value / kTurningMotorGearRatio * 360 - desiredAngle
         desiredAngle += round(angleDiff / 360) * 360
+        # desiredAngle -= 180
 
         # Convert Desired Angle from degrees to rotations
-        desiredAngle = desiredAngle / 360
+        desiredAngle = desiredAngle * kTurningMotorGearRatio / 360
+        # desiredAngle = 0
+
+        # Update Shuffleboard
+        self.BR_desire_angle.setDouble(desiredAngle)
 
         self.turningMotor.set_control(self.position_voltage.with_position(desiredAngle))
         velocity_voltage_value = self.velocity_voltage.with_velocity(state.speed/(kWheelRadius * math.pi * 2) * kDriveMotorGearRatio ) #/10
