@@ -14,30 +14,26 @@ import wpimath.trajectory
 from phoenix6 import hardware, controls
 import wpimath.units
 
-kWheelRadius = 0.0508
-kDriveMotorGearRatio = 8.14
-kTurningMotorGearRatio = 22.5 #14.2857
-kEncoderResolution = 2048
-kModuleMaxAngularVelocity = 180
-# kModuleMaxAngularAcceleration = math.tau/math.pi*180
+kWheelRadius = 0.0508  # 轮子半径（单位：米）
+kDriveMotorGearRatio = 8.14  # 驱动电机齿轮比
+kTurningMotorGearRatio = 22.5  # 转向电机齿轮比
+kEncoderResolution = 2048  # 编码器分辨率
+kModuleMaxAngularVelocity = 180  # 模块最大角速度（单位：度/秒）
+# kModuleMaxAngularAcceleration = math.tau/math.pi*180  # 模块最大角加速度（单位：度/秒^2）
 
 
 class SwerveModule:
-    def __init__(
-        self,
+    def __init__(        self,
         driveMotorChannel: int,
         turningMotorChannel: int,
         turningEncoderChannel: int,
 
     ) -> None:
-        """Constructs a SwerveModule with a drive motor, turning motor, drive encoder and turning encoder.
+        """构建一个SwerveModule，包含一个驱动电机、转向电机、和转向编码器。
 
-        :param driveMotorChannel:      PWM output for the drive motor.
-        :param turningMotorChannel:    PWM output for the turning motor.
-        # :param driveEncoderChannelA:   DIO input for the drive encoder channel A
-        # :param driveEncoderChannelB:   DIO input for the drive encoder channel B
-        :param turningEncoderChannelA: DIO input for the turning encoder channel A
-        :param turningEncoderChannelB: DIO input for the turning encoder channel B
+        :param driveMotorChannel:      驱动电机的PWM输出。
+        :param turningMotorChannel:    转向电机的PWM输出。
+        :param turningEncoderChannel: 转向编码器通道的DIO输入
         """
         # self.driveMotor = wpilib.PWMTalonFX(driveMotorChannel)
         # self.turningMotor = wpilib.PWMTalonFX(turningMotorChannel)
@@ -48,7 +44,7 @@ class SwerveModule:
         # self.turningMotor.set_position(self.turningEncoder.get_position().value)  ##### Check with lsy
 
 
-        # Start at position 0, use slot 0
+        # Start at position 0, use slot 0 真正用到的PID cfg在这里传入
         self.position_voltage = controls.PositionVoltage(0).with_slot(0)
         self.velocity_voltage = controls.VelocityVoltage(0).with_slot(0)
         # Start at position 0, use slot 1
@@ -76,7 +72,7 @@ class SwerveModule:
         # to be continuous.
         # self.turningPIDController.enableContinuousInput(-math.pi, math.pi)
 
-        # Add turning motor position to Shuffleboard
+        # Add turning motor position to Shuffleboard # Shuffleboard 打印
         self.FL_turningMotor_pos = wpilib.shuffleboard.Shuffleboard.getTab("Swerve Module").add("FL Turning Motor Position", 0.1).getEntry()
         self.FR_turningMotor_pos = wpilib.shuffleboard.Shuffleboard.getTab("Swerve Module").add("FR Turning Motor Position", 0.1).getEntry()
         self.BL_turningMotor_pos = wpilib.shuffleboard.Shuffleboard.getTab("Swerve Module").add("BL Turning Motor Position", 0.1).getEntry()
@@ -87,7 +83,7 @@ class SwerveModule:
         self.current_rotation = wpilib.shuffleboard.Shuffleboard.getTab("Swerve Module").add("Current Rotation", 0.1).getEntry()
 
     def getState(self) -> wpimath.kinematics.SwerveModuleState:
-        """Returns the current state of the module.
+        """Returns the current state of the module. 读取当前每组Swerve状态
 
         :returns: The current state of the module.
         """
@@ -114,10 +110,9 @@ class SwerveModule:
     #         wpimath.geometry.Rotation2d(self.turningEncoder.getDistance()),
     #     )
 
-    def setDesiredState(
-        self, desiredState: wpimath.kinematics.SwerveModuleState
+    def setDesiredState(        self, desiredState: wpimath.kinematics.SwerveModuleState
     ) -> None:
-        """Sets the desired state for the module.
+        """Sets the desired state for the module. 设置每组Swerve的期望状态
 
         :param desiredState: Desired state with speed and angle.
         """

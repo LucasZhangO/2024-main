@@ -12,8 +12,8 @@ import swervemodule
 
 from wpilib.shuffleboard import Shuffleboard
 
-kMaxSpeed = 2.0  # 3 meters per second
-kMaxAngularSpeed = 180  # 1/2 rotation per second
+kMaxSpeed = 2.0  # 3 meters per second   最大底盘线速度
+kMaxAngularSpeed = 180  # 1/2 rotation per second   最大底盘转向速度
 
 
 class Drivetrain:
@@ -23,9 +23,10 @@ class Drivetrain:
 
     def __init__(self) -> None:
 
-        trackwidthMeters = 0.52705
-        wheelbaseMeters = 0.52705
+        trackwidthMeters = 0.52705 ### 横向轮距
+        wheelbaseMeters = 0.52705  ### 纵向轮距
 
+        # 找中心点
         self.frontLeftLocation = wpimath.geometry.Translation2d(trackwidthMeters/2, wheelbaseMeters/2)
         self.frontRightLocation = wpimath.geometry.Translation2d(trackwidthMeters/2, -wheelbaseMeters/2)
         self.backLeftLocation = wpimath.geometry.Translation2d(-trackwidthMeters/2, wheelbaseMeters/2)
@@ -36,13 +37,16 @@ class Drivetrain:
         # self.backLeftLocation = wpimath.geometry.Translation2d(-0.381, 0.381)
         # self.backRightLocation = wpimath.geometry.Translation2d(-0.381, -0.381)
 
+        # 初始化四个对应Sweve模块
         self.frontLeft = swervemodule.SwerveModule(driveMotorChannel=0, turningMotorChannel=1, turningEncoderChannel=20)
         self.frontRight = swervemodule.SwerveModule(driveMotorChannel=10, turningMotorChannel=12, turningEncoderChannel=21)
         self.backLeft = swervemodule.SwerveModule(driveMotorChannel=3, turningMotorChannel=4, turningEncoderChannel=5)
         self.backRight = swervemodule.SwerveModule(driveMotorChannel=6, turningMotorChannel=7, turningEncoderChannel=8)
 
+        # 初始化Gyro， 我们没用到
         self.gyro = wpilib.AnalogGyro(0) # TODO: phoenix6.hardware.corepegion2
 
+        # 初始化底盘运动学（Kinematics）成员
         self.kinematics = wpimath.kinematics.SwerveDrive4Kinematics(
             self.frontLeftLocation,
             self.frontRightLocation,
@@ -61,9 +65,10 @@ class Drivetrain:
         #     ),
         # )
 
+        # 重置Gyro
         self.gyro.reset()
 
-        # add shuffleboard tab
+        # add shuffleboard tab Shuffleboard打印初始化语句
         self.FL_speed = Shuffleboard.getTab("Swerve").add("Front Left Speed", 0.1).getEntry() # set to 0.1
         self.FR_speed = Shuffleboard.getTab("Swerve").add("Front Right Speed", 0.1).getEntry()
         self.BL_speed = Shuffleboard.getTab("Swerve").add("Back Left Speed", 0.1).getEntry()
@@ -85,6 +90,14 @@ class Drivetrain:
         rot: float,
     ) -> None:
         """
+        使用摇杆输入值驱动机器人的方法。  真正最后在robot.py中调用的方法  ！！！！
+        
+        :param xSpeed: 机器人在x方向（前进）的速度。
+        :param ySpeed: 机器人在y方向（侧向）的速度。
+        :param rot: 机器人的角速度。
+        :param fieldRelative: 提供的x和y速度是否相对于场地。
+        :param periodSeconds: 时间
+        
         Method to drive the robot using joystick info.
         :param xSpeed: Speed of the robot in the x direction (forward).
         :param ySpeed: Speed of the robot in the y direction (sideways).
@@ -92,12 +105,16 @@ class Drivetrain:
         :param fieldRelative: Whether the provided x and y speeds are relative to the field.
         :param periodSeconds: Time
         """
+        # 读取Swerve模块的状态
         swerveModuleStates = self.kinematics.toSwerveModuleStates(
             wpimath.kinematics.ChassisSpeeds(xSpeed, ySpeed, rot) 
         )
+        # 利用wpilib的方法限制过饱和底盘速度 （减少抽搐用的）
         wpimath.kinematics.SwerveDrive4Kinematics.desaturateWheelSpeeds(
             swerveModuleStates, kMaxSpeed
         )
+        
+        # 设置期望状态
         self.frontLeft.setDesiredState(swerveModuleStates[0])   
         self.frontRight.setDesiredState(swerveModuleStates[1])
         self.backLeft.setDesiredState(swerveModuleStates[2])
