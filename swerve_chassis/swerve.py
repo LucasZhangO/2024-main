@@ -5,8 +5,10 @@ import constants
 from wpimath.geometry import Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics
 from wpimath.kinematics import ChassisSpeeds
+from wpilib.shuffleboard import Shuffleboard
 
 from phoenix6 import hardware, signals, controls
+
 
 class Swerve:
     # TODO: update these values # Done (Jim Mei)
@@ -32,47 +34,45 @@ class Swerve:
             self.frontLeftLocation, self.frontRightLocation, self.backLeftLocation, self.backRightLocation
         )
 
-    def robotInit(self):
-        for module in self.modules:
-            module.robotInit()
+        # add shuffleboard tab
+        self.FL_speed = Shuffleboard.getTab("Swerve").add("Front Left Speed", 0).getEntry()
+        self.FR_speed = Shuffleboard.getTab("Swerve").add("Front Right Speed", 0).getEntry()
+        self.BL_speed = Shuffleboard.getTab("Swerve").add("Back Left Speed", 0).getEntry()
+        self.BR_speed = Shuffleboard.getTab("Swerve").add("Back Right Speed", 0).getEntry()
 
-    def autonomousInit(self):
-        for module in self.modules:
-            module.autonomousInit()
 
-    def autonomousPeriodic(self):
-        for module in self.modules:
-            module.autonomousPeriodic()
-
-    def teleopInit(self):
-        for module in self.modules:
-            module.teleopInit()
-
-    def teleopPeriodic(self, x, y, rotation):
+    def drive(self, x, y, rotation):
         # Example chassis speeds: 1 meter per second forward, 3 meters
         # per second to the left, and rotation at 1.5 radians per second
         # counterclockwise.
         # speeds = ChassisSpeeds(1.0, 3.0, 1.5)
-        speeds = ChassisSpeeds(y, x, rotation)
+        # speeds = ChassisSpeeds.fromFieldRelativeSpeeds(y, x, rotation)
+        speeds = ChassisSpeeds(x, y, rotation)
+
 
         # Convert to module states
         moduleStates = self.kinematics.toSwerveModuleStates(speeds) # frontLeft, frontRight, backLeft, backRight
         for state, module in zip(moduleStates, self.modules):
-            module.teleopPeriodic(state)
+            module.setState(state)
 
-    def testInit(self):
-        for module in self.modules:
-            module.testInit()
+        # Update Shuffleboard
+        self.FL_speed.setDouble(moduleStates[0].speed)
+        self.FR_speed.setDouble(moduleStates[1].speed)
+        self.BL_speed.setDouble(moduleStates[2].speed)
+        self.BR_speed.setDouble(moduleStates[3].speed)
 
-    def testPeriodic(self):
-        for module in self.modules:
-            module.testPeriodic()
+        #  lsy shuffleboard old code
+        # Shuffleboard.getTab("Swerve").add("Front Left Speed", moduleStates[0].speed)
+        # Shuffleboard.getTab("Swerve").add("Front Right Speed", moduleStates[1].speed)
+        # Shuffleboard.getTab("Swerve").add("Back Left Speed", moduleStates[2].speed)
+        # Shuffleboard.getTab("Swerve").add("Back Right Speed", moduleStates[3].speed)
 
 class SwerveModule:
-    def __init__(self, drive_id, steer_id, encoder_id):
-        self.drive_id = drive_id
-        self.steer_id = steer_id
-        self.encoder_id = encoder_id
+    def __init__(self, ids):
+        # self.drive_id = drive_id
+        # self.steer_id = steer_id
+        # self.encoder_id = encoder_id
+        self.drive_id, self.steer_id, self.encoder_id = ids
 
         # Deadbanding constants
         self.deadband_x = 0.1
@@ -88,9 +88,8 @@ class SwerveModule:
         # Motor acceleration limiting constants
         self.max_acceleration = 0.5
 
-    def robotInit(self):
-        self.encoder.reset()
-        self.gyro.reset()
+        # self.encoder.reset()
+        # self.gyro.reset()
 
         self.drive_motor = hardware.TalonFX(self.drive_id, "*")
         self.steer_motor = hardware.TalonFX(self.steer_id, "*")
@@ -98,31 +97,26 @@ class SwerveModule:
         # TODO: initialize the encoders # Done
         self.drive_encoder = self.drive_id         # hardware.Encoder(self.encoder_id) speed encoder
         self.steer_encoder = self.steer_id          # .... position encoder
+        self.cancoder = self.encoder_id
+    
 
-    def autonomousInit(self):
-        pass
-
-    def autonomousPeriodic(self):
-        pass
-
-    def teleopInit(self):
-        pass
-
-    def teleopPeriodic(self, state):
+    def setState(self, state):
         speed = state.speed
-        angle = state.angle
+        angle = state.angle.degrees()
 
         # Applyu deadband
         if abs(speed) < self.deadband_x:
             speed = 0
+        # if abs(y) < self.deadband_y:
+        #     y = 0
 
         # TODO: control self.steer motor to reach "angle" (angle->position closed loop)
-        
+        self.steer_motor.set_control(controls.PositionVoltage(0).with_slot(0).with_position(angle))
 
         # TODO: control self.drive motor to reach "speed" (speed closed loop)
-
+        self.drive_motor.set_control(controls.VelocityVoltage(0).with_slot(0).with_velocity(speed))
     
-    # def 
+    # def setMotorSpeeds(self, x, y, rotation):
     #     # Apply deadband
     #     if abs(x) < self.deadband_x:
     #         x = 0
@@ -145,11 +139,7 @@ class SwerveModule:
     #     self.drive_motor.set(drive_speed)
     #     self.steer_motor.set(steer_speed)
 
-    def testInit(self):
-        pass
-
-    def testPeriodic(self):
-        pass
+   
 
     # def calculate_motor_speeds(self, velocity, angle):
     #     # Calculate drive and steer motor speeds using the velocity and angle

@@ -10,7 +10,7 @@ from phoenix6 import unmanaged
 import typing
 
 if typing.TYPE_CHECKING:
-    from robot import MyRobot
+    from motor_pos_closed_loop.robot import MyRobot
 
 
 class PhysicsEngine:
